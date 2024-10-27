@@ -1064,13 +1064,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "soroban-increment-contract"
-version = "0.0.0"
-dependencies = [
- "soroban-sdk",
-]
-
-[[package]]
 name = "soroban-ledger-snapshot"
 version = "21.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1154,6 +1147,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "soroban-token-sdk"
+version = "21.7.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f3f0338d16da18acc9da2e4c67f56f5880b5f1411892cb5bb8430ec15c69076d"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
 name = "soroban-wasmi"
 version = "0.31.1-soroban.20.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1164,6 +1166,14 @@ dependencies = [
  "wasmi_arena",
  "wasmi_core",
  "wasmparser-nostd",
+]
+
+[[package]]
+name = "soroworld-land-contract"
+version = "0.0.0"
+dependencies = [
+ "soroban-sdk",
+ "soroban-token-sdk",
 ]
 
 [[package]]
