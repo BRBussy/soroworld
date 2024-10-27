@@ -1,11 +1,8 @@
-//! This contract demonstrates a sample implementation of the Soroban token
-//! interface.
 use core::panic;
-
 use crate::admin::{has_administrator, read_administrator, write_administrator};
 use crate::metadata::{read_name, read_symbol, write_metadata};
-use crate::storage_types::INSTANCE_LIFETIME_THRESHOLD;
-use crate::storage_types::INSTANCE_BUMP_AMOUNT;
+use crate::storage_types::{INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT, Coordinates};
+use crate::coordinates::write_coordinates;
 use soroban_sdk::token::{self, Interface as _};
 use soroban_sdk::{contract, contractimpl, Address, Env, String};
 use soroban_token_sdk::metadata::TokenMetadata;
@@ -16,23 +13,26 @@ pub struct Land;
 
 #[contractimpl]
 impl Land {
-    pub fn initialize(e: Env, admin: Address, x: u32, y: u32) {
+    pub fn initialize(e: Env, admin: Address, coordinates: Coordinates) {
         if has_administrator(&e) {
             panic!("already initialized")
         }
 
+        // initialise contract
         write_administrator(&e, &admin);
-
         write_metadata(
             &e,
             TokenMetadata {
                 decimal: 0,
-                // FIXME: include x and y cooordinate here
                 // FIXME: add world name maybe
                 name: String::from_str(&e, "Soroworld Land"),
                 // FIXME: allow world short name to be used here
                 symbol: String::from_str(&e, "SRWLDLAND"),
             },
+        );
+        write_coordinates(
+            &e,
+            &coordinates,
         )
     }
 }

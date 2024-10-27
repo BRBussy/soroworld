@@ -1,16 +1,16 @@
 #![cfg(test)]
 extern crate std;
 
-use crate::{contract::Land, LandClient};
+use crate::{contract::Land, LandClient, storage_types::DataKey, storage_types::Coordinates};
 use soroban_sdk::{
-    symbol_short,
+    String,
     testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation},
     Address, Env, IntoVal, Symbol,
 };
 
-fn create_land<'a>(e: &Env, admin: &Address, x: u32, y: u32) -> LandClient<'a> {
+fn create_land<'a>(e: &Env, admin: &Address, coordinates: &Coordinates) -> LandClient<'a> {
     let land = LandClient::new(e, &e.register_contract(None, Land {}));
-    land.initialize(admin, &x, &y);
+    land.initialize(admin, coordinates);
     land
 }
 
@@ -19,12 +19,80 @@ fn test() {
     let e = Env::default();
     e.mock_all_auths();
 
-    let admin1 = Address::generate(&e);
-    let admin2 = Address::generate(&e);
-    let user1 = Address::generate(&e);
-    let user2 = Address::generate(&e);
-    let user3 = Address::generate(&e);
-    let token = create_land(&e, &admin1, 0, 0);
+    // prepare keys
+    let admin = Address::generate(&e);
+    let other_key = Address::generate(&e);
+
+    // prepare instance of the land contract
+    let land = create_land(
+        &e,
+        &admin,
+        &Coordinates { x: 12, y: 11 }
+    );
+
+    // check admin
+    assert_eq!(
+        admin,
+        e.as_contract(&land.address, || {
+            let key = DataKey::Admin;
+            e.storage().instance().get::<_, Address>(&key).unwrap()
+        }),
+    );
+
+    // check coordinates
+    assert_eq!(
+        Coordinates { x: 12, y: 11 },
+        e.as_contract(&land.address, || {
+            let key = DataKey::Coordinates;
+            e.storage().instance().get::<_, Coordinates>(&key).unwrap()
+        }),
+    );
+
+    // check token metadata
+    assert_eq!(
+        0,
+        land.decimals(),
+    );
+    assert_eq!(
+        String::from_str(&e, "Soroworld Land"),
+        land.name(),
+    );
+    assert_eq!(
+        String::from_str(&e, "SRWLDLAND"),
+        land.symbol(),
+    );    
+
+    // balance check
+    assert_eq!(
+        1,
+        land.balance(&admin),
+    );
+    assert_eq!(
+        0,
+        land.balance(&other_key),
+    );
+
+    // transfer to other user
+    land.transfer(&admin, &other_key, &1);
+
+    // check admin moved
+    assert_eq!(
+        other_key,
+        e.as_contract(&land.address, || {
+            let key = DataKey::Admin;
+            e.storage().instance().get::<_, Address>(&key).unwrap()
+        }),
+    );
+
+    // balance check
+    assert_eq!(
+        0,
+        land.balance(&admin),
+    );
+    assert_eq!(
+        1,
+        land.balance(&other_key),
+    );
 
     // token.mint(&user1, &1000);
     // assert_eq!(
