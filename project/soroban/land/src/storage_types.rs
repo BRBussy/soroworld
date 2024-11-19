@@ -8,12 +8,4 @@ pub(crate) const INSTANCE_LIFETIME_THRESHOLD: u32 = INSTANCE_BUMP_AMOUNT - DAY_I
 #[contracttype]
 pub enum DataKey {
     Admin,
-    Coordinates,
-}
-
-#[contracttype]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Coordinates {
-    pub x: u32,
-    pub y: u32,
 }

@@ -1,8 +1,7 @@
 use core::panic;
-use crate::admin::{has_administrator, read_administrator, write_administrator};
+use crate::admin::{has_admin, read_admin, write_admin};
 use crate::metadata::{read_name, read_symbol, write_metadata};
-use crate::storage_types::{INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT, Coordinates};
-use crate::coordinates::write_coordinates;
+use crate::storage_types::{INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT};
 use soroban_sdk::token::{self, Interface as _};
 use soroban_sdk::{contract, contractimpl, Address, Env, String};
 use soroban_token_sdk::metadata::TokenMetadata;
@@ -13,27 +12,21 @@ pub struct Land;
 
 #[contractimpl]
 impl Land {
-    pub fn initialize(e: Env, admin: Address, coordinates: Coordinates) {
-        if has_administrator(&e) {
+    pub fn init(e: Env, admin: Address) {
+        if has_admin(&e) {
             panic!("already initialized")
         }
 
         // initialise contract
-        write_administrator(&e, &admin);
+        write_admin(&e, &admin);
         write_metadata(
             &e,
             TokenMetadata {
                 decimal: 0,
-                // FIXME: add world name maybe
                 name: String::from_str(&e, "Soroworld Land"),
-                // FIXME: allow world short name to be used here
                 symbol: String::from_str(&e, "SRWLDLAND"),
             },
         );
-        write_coordinates(
-            &e,
-            &coordinates,
-        )
     }
 }
 
@@ -48,7 +41,7 @@ impl token::Interface for Land {
     }
 
     fn balance(e: Env, id: Address) -> i128 {
-        let admin = read_administrator(&e);
+        let admin = read_admin(&e);
 
         if admin == id {
             1
@@ -59,16 +52,16 @@ impl token::Interface for Land {
 
     fn transfer(e: Env, from: Address, to: Address, amount: i128) {
         // confirm that contract is initialised
-        if !has_administrator(&e) {
+        if !has_admin(&e) {
             panic!("not initialised")
         }
 
-        // get the administrator
-        let admin = read_administrator(&e);
+        // get the admin
+        let admin = read_admin(&e);
 
-        // only the administrator can transfer
+        // only the admin can transfer
         if from != admin {
-            panic!("only administrator can transfer");
+            panic!("only admin can transfer");
         }
 
         // confirm from (i.e. admin) has signed
@@ -84,8 +77,8 @@ impl token::Interface for Land {
             .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
 
 
-        // update administrator to implement transfer
-        write_administrator(&e, &to);
+        // update admin to implement transfer
+        write_admin(&e, &to);
 
         // emit token transfered event
         TokenUtils::new(&e).events().transfer(from, to, amount);

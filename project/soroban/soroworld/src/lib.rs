@@ -1,10 +1,9 @@
 #![no_std]
 
 mod admin;
-mod contract;
-mod metadata;
 mod storage_types;
 mod coordinates;
+mod contract;
 mod test;
 
-pub use crate::contract::LandClient;
+pub use crate::contract::SoroworldClient;
