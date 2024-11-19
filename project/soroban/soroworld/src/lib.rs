@@ -2,7 +2,8 @@
 
 mod admin;
 mod storage_types;
-mod coordinates;
+mod land_wasm_hash;
+mod current_land_coordinates;
 mod contract;
 mod test;
 

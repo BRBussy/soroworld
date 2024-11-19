@@ -16,3 +16,7 @@ pub fn write_admin(e: &Env, id: &Address) {
     let key = DataKey::Admin;
     e.storage().instance().set(&key, id);
 }
+
+pub fn require_admin_auth(env: &Env) {
+    read_admin(&env).require_auth();
+}
