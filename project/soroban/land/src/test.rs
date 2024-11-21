@@ -16,25 +16,25 @@ fn create_land<'a>(e: &Env, admin: &Address) -> LandClient<'a> {
 
 #[test]
 fn test() {
-    let e = Env::default();
-    e.mock_all_auths();
+    let env = Env::default();
+    env.mock_all_auths();
 
     // prepare keys
-    let admin = Address::generate(&e);
-    let other_key = Address::generate(&e);
+    let admin = Address::generate(&env);
+    let other_key = Address::generate(&env);
 
     // prepare instance of the land contract
     let land = create_land(
-        &e,
+        &env,
         &admin,
     );
 
     // check admin
     assert_eq!(
         admin,
-        e.as_contract(&land.address, || {
+        env.as_contract(&land.address, || {
             let key = DataKey::Admin;
-            e.storage().instance().get::<_, Address>(&key).unwrap()
+            env.storage().instance().get::<_, Address>(&key).unwrap()
         }),
     );
 
@@ -44,11 +44,11 @@ fn test() {
         land.decimals(),
     );
     assert_eq!(
-        String::from_str(&e, "Soroworld Land"),
+        String::from_str(&env, "Soroworld Land"),
         land.name(),
     );
     assert_eq!(
-        String::from_str(&e, "SRWLDLAND"),
+        String::from_str(&env, "SRWLDLAND"),
         land.symbol(),
     );    
 
@@ -68,9 +68,9 @@ fn test() {
     // check admin moved
     assert_eq!(
         other_key,
-        e.as_contract(&land.address, || {
+        env.as_contract(&land.address, || {
             let key = DataKey::Admin;
-            e.storage().instance().get::<_, Address>(&key).unwrap()
+            env.storage().instance().get::<_, Address>(&key).unwrap()
         }),
     );
 

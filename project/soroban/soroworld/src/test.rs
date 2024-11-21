@@ -7,6 +7,14 @@ use soroban_sdk::{
     Address,
 };
 
+// The contract that will be deployed by the deployer contract.
+mod land {
+    soroban_sdk::contractimport!(
+        file =
+            "../../../target/wasm32-unknown-unknown/release/soroworld_land_contract.wasm"
+    );
+}
+
 fn create_soroworld<'a>(e: &Env, admin: &Address) -> SoroworldClient<'a> {
     let soroworld = SoroworldClient::new(e, &e.register_contract(None, Soroworld{}));
     soroworld.init(admin);
@@ -14,7 +22,7 @@ fn create_soroworld<'a>(e: &Env, admin: &Address) -> SoroworldClient<'a> {
 }
 
 #[test]
-fn test() {
+fn test_init() {
     let e = Env::default();
     e.mock_all_auths();
 
@@ -31,6 +39,40 @@ fn test() {
             let key = DataKey::Admin;
             e.storage().instance().get::<_, Address>(&key).unwrap()
         }),
+    );
+}
+
+#[test]
+fn test_mint_land() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    // Upload the land contract Wasm to be deployed from the sorowrld contract.
+    // (cool side note: This can also be called from within a contract if needed.)
+    let land_wasm_hash = env.deployer().upload_contract_wasm(land::WASM);
+
+    // prepare keys
+    let soroworld_admin = Address::generate(&env);
+    let new_land_owner = Address::generate(&env);
+
+    // prepare instance of the soroworld contract
+    let soroworld = create_soroworld(&env, &soroworld_admin);
+
+    // set land wasm hash to allow future minting
+    soroworld.set_land_wasm(&land_wasm_hash);
+
+    // mint land and create client
+    let new_land_contract_address = soroworld.mint_land(&new_land_owner);
+    let new_land_client = land::Client::new(&env, &new_land_contract_address);
+
+    // confirm new land owner set by checking balance
+    assert_eq!(
+        1,
+        new_land_client.balance(&new_land_owner),
+    );
+    assert_eq!(
+        0,
+        new_land_client.balance(&Address::generate(&env)),
     );
 }
 
