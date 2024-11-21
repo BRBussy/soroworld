@@ -1,6 +1,7 @@
 {
     "conventionalCommits.scopes": [
         "contracts-land",
-        "soroban contracts"
+        "soroban contracts",
+        "portal"
     ]
 }
