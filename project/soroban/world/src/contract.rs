@@ -13,6 +13,7 @@ impl Soroworld {
         env: Env,
         admin: Address,
     ) {
+        // FIXME: use constructor instead
         if has_admin(&env) {
             panic!("already initialised")
         }
@@ -48,13 +49,11 @@ impl Soroworld {
             // - x & y coordinates as salt
             let deployed_address = env
             .deployer()
-            .with_address(
-                env.current_contract_address(),
-                BytesN::<32>::from_array(&env, &salt),
-            )
+            .with_current_contract(BytesN::<32>::from_array(&env, &salt))
             .deploy(read_land_wasm_hash(&env));
 
             // initialise new land with owner
+            // FIXME: use constructor instead
             let _: Val = env.invoke_contract(
                 &deployed_address,
                 &Symbol::new(&env, "init"),

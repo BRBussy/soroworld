@@ -10,8 +10,7 @@ use soroban_sdk::{
 // The contract that will be deployed by the deployer contract.
 mod land {
     soroban_sdk::contractimport!(
-        file =
-            "../../../target/wasm32-unknown-unknown/release/soroworld_land_contract.wasm"
+        file = "../../../target/wasm32-unknown-unknown/release/soroworld_land_contract.wasm"
     );
 }
 
