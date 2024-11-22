@@ -6,7 +6,8 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "project/portal"
+    "project/portal",
+    "project/soroban/land/js"
   ],
   "devDependencies": {
     "@types/node": "^16.7.13",
